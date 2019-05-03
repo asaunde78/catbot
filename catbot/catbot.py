@@ -17,15 +17,6 @@ def intable(a):
         return int(a)
     except ValueError:
         return False
-def getId(a):
-    a = str(a)
-    
-    rem = ['<','>','!', '@']
-    for x in range(len(rem)):
-        if rem[x] in a:
-            a.replace(rem[x],'')
-        else:
-            return False
 @bot.event
 async def on_ready():
         print('logged in as')
@@ -49,22 +40,6 @@ async def r(ctx, *, content):
     content = ' '.join(msg)
     for i in range(times):
         await ctx.send(content)
-@bot.command()
-async def dm(ctx, user = discord.User,*, content):
-    if(ctx.author.id == 179741296464887808):
-        
-        msg = content.split()
-        times = intable(msg[1])
-        if(times):
-            msg.remove(msg[0])
-            msg.remove(msg[0])
-        else:
-            times = 1
-        content = ' '.join(msg)
-        for i in range(times):
-            await ctx.user.send(content)
-    else:
-        await ctx.send("You are NOT allowed to do that!")
 @bot.event
 async def on_message(message):
     if message.author.id == bot.user.id or message.author.id == 493938037189902358:
