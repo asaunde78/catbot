@@ -1,5 +1,6 @@
 import discord, asyncio, random
 from discord.ext import commands 
+import datetime
 description = 'This is CatBot'
 bot = commands.Bot(command_prefix='~', description=description)
 
@@ -29,6 +30,16 @@ async def on_ready():
         greeting = random.randint(1, 7)
         greetings = {1:"MIAOU!", 2:"CatBot reporting for duty!", 3:"CatBot back online!",4:"CatSystems turning on...", 5:"I am a CatBot", 6:"Miaou!", 7:"CatOS loading..."}
         await channel.send(greetings[greeting])
+@bot.command()
+async def h(ctx):
+    
+    messages = await ctx.history(limit = ).flatten()
+    history  = random.randint(1,len(messages))
+    for x in range(len(messages)-5, len(messages)):
+        msg = messages[x].content.split()
+        print(msg)
+        if not '~h' in msg and messages[x].author.id != bot.user.id and messages[x].author.id != 493938037189902358:
+            await ctx.send(messages[x].content + "\n by: " +str(messages[x].author))
 @bot.command()
 async def r(ctx, *, content):
     msg = content.split()
