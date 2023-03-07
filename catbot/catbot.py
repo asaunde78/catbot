@@ -5,7 +5,7 @@ import TenGiphPy
 import subprocess
 import sys
 ip = subprocess.check_output("hostname -I".split()).decode().strip("\n")
-import asyncio
+
 print(ip)
 
 description = 'This is CatBot'
@@ -61,6 +61,13 @@ async def on_message(message):
         await message.add_reaction('❤️')
     #else:
         #await message.add_reaction('👎')
+    if message.content.startswith('question: '):
+        question = message.content[len('question: '):]
+        random.seed(abs(hash(question)))
+        out = random.choice(["Yes!! :3","No.. :( Sorry :3", "Ask again later... mrow :3"])
+        random.seed()
+        await message.channel.send(out)
+        
     if message.content.startswith('change word '):
         word = message.content.replace('change word ','')
     if message.content.startswith('g '):
