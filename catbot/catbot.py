@@ -1,17 +1,23 @@
 import discord, asyncio, random
 from discord.ext import commands 
 import datetime
-import tenorpy
-import subprocess 
+import TenGiphPy
+import subprocess
+import sys
 ip = subprocess.check_output("hostname -I".split()).decode().strip("\n")
-
+import asyncio
 print(ip)
 
 description = 'This is CatBot'
-bot = commands.Bot(command_prefix='~', description=description)
+bot = commands.Bot(intents=discord.Intents.all(),command_prefix=commands.when_mentioned_or("~"))
 letters = {'a': '🇦', 'b': '🇧', 'c': '🇨', 'd': '🇩', 'e': '🇪', 'f': '🇫', 'g': '🇬', 'h': '🇭', 'i': '🇮', 'j': '🇯', 'k': '🇰', 'l': '🇱', 'm': '🇲', 'n': '🇳', 'o': '🇴', 'p': '🇵', 'q': '🇶', 'r': '🇷', 's': '🇸', 't': '🇹', 'u': '🇺', 'v': '🇻', 'w': '🇼', 'x': '🇽', 'y': '🇾', 'z': '🇿'}
 word = 'nice'
-t = tenorpy.Tenor()
+from token_folder import token
+#print(token.discordtoken)
+
+t = TenGiphPy.Tenor(token.tenortoken)
+print(t.search("hi"))
+sys.exit()
 def isWord(string, word):
     cat = word.upper()
     if len(string) < len(cat):
@@ -45,7 +51,7 @@ async def on_message(message):
     if message.author.id == bot.user.id or message.author.id == 493938037189902358:
         return
     msg = message.content.split()
-    print(msg)
+    print(message.content)
     
     if message.content.startswith('c say '):
         text = message.content.replace("c say ", '', 1)
@@ -60,8 +66,11 @@ async def on_message(message):
     if message.content.startswith('g '):
         gif = message.content.replace('g ', '', 1)
         gif = ''.join(gif)
-        
-        await message.channel.send(t.random(gif))
+        results = t.search(gif,limit=10)
+        print(results)
+        g = random.choice(results)
+        print(g)
+        await message.channel.send("HI!")
     for item in msg:
         if isWord(item, word) or item == bot.user.mention:
             for a in list(word):
@@ -72,5 +81,5 @@ async def on_message(message):
             intros = {1:"Hi, ", 2:"Yo yo, ", 3:"Wazaaa, ", 4:"What's up, ", 5:"Yo, "}
             await message.channel.send(intros[random.randint(1,5)]+ message.author.mention + responses[random.randint(1,5)])
     await bot.process_commands(message)
-from token_folder import token
-bot.run(token)
+
+bot.run(token.discordtoken)
