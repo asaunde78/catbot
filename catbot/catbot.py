@@ -16,8 +16,8 @@ from token_folder import token
 #print(token.discordtoken)
 
 t = TenGiphPy.Tenor(token.tenortoken)
-print(t.search("hi"))
-sys.exit()
+#print(t.search("hi"))
+#sys.exit()
 def isWord(string, word):
     cat = word.upper()
     if len(string) < len(cat):
