@@ -1,10 +1,18 @@
 import discord, asyncio, random
 from discord.ext import commands 
 import datetime
-import TenGiphPy
+
+
+import requests
+import json
+
 import subprocess
 import sys
+
 ip = subprocess.check_output("hostname -I".split()).decode().strip("\n")
+
+
+
 
 print(ip)
 
@@ -15,7 +23,7 @@ word = 'nice'
 from token_folder import token
 #print(token.discordtoken)
 
-t = TenGiphPy.Tenor(token.tenortoken)
+#t = TenGiphPy.Tenor(token.tenortoken)
 #print(t.search("hi"))
 #sys.exit()
 def isWord(string, word):
@@ -70,14 +78,25 @@ async def on_message(message):
         
     if message.content.startswith('change word '):
         word = message.content.replace('change word ','')
+    #if message.content.startswith('g '):
+    #    gif = message.content.replace('g ', '', 1)
+    #    gif = ''.join(gif)
+    #    results = t.search(gif,limit=10)
+    #    print(results)
+    #    g = random.choice(results)
+    #    print(g)
+    #    await message.channel.send("HI!")
     if message.content.startswith('g '):
         gif = message.content.replace('g ', '', 1)
         gif = ''.join(gif)
-        results = t.search(gif,limit=10)
-        print(results)
-        g = random.choice(results)
-        print(g)
-        await message.channel.send("HI!")
+        params = {'q':gif}
+        params['key']=token.tenortoken
+        #params['q']="hello"
+
+        response = requests.get("https://api.tenor.co/v2/search",params = params)
+        results = json.loads(response.text)
+        #['media'][0]['gif']['url']
+        await message.channel.send(random.choice(results['results'])['itemurl'])
     for item in msg:
         if isWord(item, word) or item == bot.user.mention:
             for a in list(word):
