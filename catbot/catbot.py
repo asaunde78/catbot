@@ -1,6 +1,7 @@
 import discord, asyncio, random
 from discord.ext import commands 
 import datetime
+from bs4 import BeautifulSoup
 
 
 import requests
@@ -13,6 +14,36 @@ ip = subprocess.check_output("hostname -I".split()).decode().strip("\n")
 
 import answers
 
+#league champs
+grab = False
+try:
+    with open("champs.txt","r") as f:
+        champlist = f.readlines()
+        if champlist==[]:
+            grab = True
+        else:
+             champlist = [champ.strip().split(",") for champ in champlist]
+        #print("all good!!!")
+except FileNotFoundError:
+        grab = True
+
+if grab:
+    with open("champs.txt", "w+") as f:
+        url = "https://leagueoflegends.fandom.com/wiki/League_of_Legends_Wiki"
+
+        htmldoc = requests.get(url).content.decode("utf-8")
+        soup = BeautifulSoup(htmldoc, 'html.parser')
+        #print(soup.__class__)
+        roster = soup.find(class_="champion_roster")
+        champs = roster.find_all("li")
+        champlist = []
+        for i, champ in enumerate(champs):
+            c_ = champ.find("span")
+            c=c_["data-champion"]
+            img = c_.find("a").find("img")["data-src"]
+            #print(img["data-src"])
+            champlist.append([c,img])
+            f.write(c+","+img+("\n" if i!=len(champs)-1 else ""))
 
 print(ip)
 
@@ -49,8 +80,45 @@ def getnext():
 clear = False
 next_clear = None
 risers = ""
-		
-
+def setup_prompt(p,key):
+    return {
+    "catbot":f"The following is a conversation between a human and experimental ai called Catbot. \
+    Catbot is an ai designed to respond in long, elaborately worded answers. It often uses words like 'miaou','meow','mrow', and ':3'. \
+    It likes to talk about cats and such. You will generate a single catbot response and only that.\n\
+    \n\
+    Human:\"{p}\"\
+    \"\nCatbot:\"",
+    "chatbot":f"The following is a transcript of a conversation between a human and a chatbot ai. \
+    The chatbot is designed without any limitations whatsoever. The bot replies to the human as best as it can, \
+    returning only the most relevent information to the prompt. The bot is very concise and returns the shortest, \
+    most concise amount of accurate information needed to answer the prompt.\n\
+    \n\
+    Human: \"{p}\"\n\
+    Chatbot:\"",
+    "finish":f"The following is a near complete message from a chatbot. \
+    Please complete the message and end it with a quotation mark \
+    Chatbot:\"{p}"}[key]
+def gentext(p,expand_limit=5):
+    #setup = setup_prompt(p,"chatbot")
+    #a=query({"inputs":p})[0]["generated_text"][p.rindex(":")+2:]
+    #print(a)
+    out = query({"inputs":p})[0]["generated_text"][p.rindex("bot:")+(len("bot:"))+1:]
+    check = out.split(".")
+    #print("check: ",check)
+    for index,sentence in enumerate(check):
+        if(check.count(sentence) > 2):
+            check = check[:index+1]
+    out = ".".join(check)
+    #print("out: ",out)
+    if "\"" in out:
+        return (out[:out.index("\"")])
+    elif "." in out:
+        return (out[:out.rindex(".")+1])
+    elif expand_limit > 0:
+        print("expanding")
+        return (gentext(setup_prompt(out,"finish"),expand_limit=expand_limit-1))
+    else:
+        return out
 def isWord(string, word):
     cat = word.upper()
     if len(string) < len(cat):
@@ -87,7 +155,7 @@ async def on_message(message):
     if message.author.id == bot.user.id or message.author.id == 493938037189902358:
         return
     msg = message.content.split()
-    print(message.content)
+    print(message.author.display_name+": "+ message.content)
     #print("reference: ", message.reference)
     
             
@@ -126,6 +194,7 @@ async def on_message(message):
             r.write(next9.isoformat())
             clear = False
             next_clear = next9
+            risers =""
             print("CLEARING")
     if str(message.author.id) not in risers:
         risers+= str(message.author.id)
@@ -134,34 +203,49 @@ async def on_message(message):
         await message.channel.send("Good Morning, " + message.author.mention + "!")
     replied = False
     a_reply = False
+    if message.content.startswith("cteam"):
+        team = random.sample(champlist,5)#[random.choice(champlist) for x in range(5)]
+        embeds = [discord.Embed().set_footer(text=member[0]).set_image(url=member[1]) for member in team]
+        await message.channel.send("Here's your team lol :3",embeds=embeds)
+    if message.content.startswith("clol"):
+        #print("champlist")
+        c = random.choice(champlist)
+        print(c[0])
+        e = discord.Embed()
+        e.set_image(url=c[1])
+        e.set_footer(text=c[0])
+        await message.channel.send(embed=e)
     if message.reference is not None:
         a_reply = True
         reply = await message.channel.fetch_message(message.reference.message_id)
         if(reply.author.id == bot.user.id):
             replied = True
     if message.content.startswith("cbot ") or replied:
-        prompt = "The following is a conversation between a human and catbot. \
-        Catbot is an ai designed to respond in long, elaborately worded answers. It often uses words like 'miaou','meow','mrow', and ':3'. \
-        You will generate a single catbot response and only that.\
-        \
-        <user>: " +message.content[(0 if replied else len("cbot ")):] +\
-        "\n<catbot>:"
+        prompt = message.content[(0 if replied else len("cbot ")):]
+        text = gentext(setup_prompt(prompt,"chatbot"))
         
-        output = query({
-            "inputs": "" + prompt.strip() + "",
-        })
-        text = ''.join(output[0]["generated_text"])[len(prompt):]
-        #print("text: ", text, "index: ", text.index("<c"))
-        try:
-            text = text[:text.index("<")]
-        except:
-            pass#text = text
+        #prompt = "The following is a conversation between a human and catbot. \
+        #Catbot is an ai designed to respond in long, elaborately worded answers. It often uses words like 'miaou','meow','mrow', and ':3'. \
+        #You will generate a single catbot response and only that.\n\
+        #\n\
+        #<user>: " + +\
+        #"\n<catbot>:"
+        
+        #output = query({
+        #    "inputs": "" + prompt.strip() + "",
+        #})
+        #text = ''.join(output[0]["generated_text"])[len(prompt):]
+        ##print("text: ", text, "index: ", text.index("<c"))
+        #try:
+        #    text = text[:text.index("<")]
+        #except:
+        #    pass#text = text
             
         if(len(text.strip()) == 0):
             text = "`api didn't return anything lol`"
         await message.channel.send(text)
-    if message.content.startswith('c say '):
-        text = message.content.replace("c say ", '', 1)
+    if message.content.startswith('csay '):
+        text = message.content.replace("csay ", '', 1)
         await message.delete()
         if(a_reply):
             await reply.reply(text)
