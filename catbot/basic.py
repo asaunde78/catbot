@@ -19,6 +19,7 @@ class BasicClient(discord.Client):
         self.answers = ["Yes!! :3","No.. :( Sorry :3","Ask again later... mrow :3","Hmm... I'm not sure. :3","Oh for sure ;3","No way, dude!! :3","I'm just a cat! idk! :3","Kitty say is: YES!!! :3","Kitty say is: NO!!!!! ;3"]
 
     async def on_ready(self):
+        await tree.sync(guild=discord.Object(id=token.guild))
         print('logged in as')
         print(self.user.name)
         print(self.user.id)
@@ -89,5 +90,11 @@ class BasicClient(discord.Client):
                 
                 await message.channel.send(random.choice(self.intros)+ message.author.mention + random.choice(self.responses))
 
+client = BasicClient(intents=discord.Intents.all())
+tree = discord.app_commands.CommandTree(client)
 
-BasicClient(intents=discord.Intents.all()).run(token.discordtoken)
+@tree.command(name="ping",description="pings the bot :3",guild = discord.Object(id=token.guild))
+async def ping(interaction):
+    await interaction.response.send_message("Pong")
+
+client.run(token.discordtoken)
