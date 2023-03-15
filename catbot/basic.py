@@ -96,5 +96,8 @@ tree = discord.app_commands.CommandTree(client)
 @tree.command(name="ping",description="pings the bot :3",guild = discord.Object(id=token.guild))
 async def ping(interaction):
     await interaction.response.send_message("Pong")
+@tree.context_menu(name="hehe",guild =discord.Object(id=token.guild))
+async def hehe(interaction: discord.Interaction, msg: discord.Message):
+    await interaction.response.send_message(":thumbsup:")
 
 client.run(token.discordtoken)
