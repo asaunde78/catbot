@@ -50,7 +50,8 @@ class TimeClient(discord.Client):
                     
                     self.clear = True
                     print("something was weird", e)
-                    traceback.print_exc()
+                    with open("token_folder/timeout.txt","w") as r:
+                        r.write(traceback.print_exc())
         else:
             #print("used next_clear")
             
