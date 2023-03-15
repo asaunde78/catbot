@@ -3,6 +3,7 @@ from token_folder import token
 
 
 import datetime
+import traceback 
 
 class TimeClient(discord.Client):
     def __init__(self,*args,**kwargs):
@@ -29,10 +30,10 @@ class TimeClient(discord.Client):
             return
 
         if self.next_clear == None:
-            with open("time.txt","w+") as r:
+            with open("time.txt","r+") as r:
                 try:
                     t = r.readlines()
-                    
+                    #print(t)
                     time = t[0].strip()
                     self.risers = ''.join(t[1:])
                     print(self.risers)
@@ -49,6 +50,7 @@ class TimeClient(discord.Client):
                     
                     self.clear = True
                     print("something was weird", e)
+                    traceback.print_exc()
         else:
             #print("used next_clear")
             
