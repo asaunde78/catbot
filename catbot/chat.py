@@ -12,7 +12,7 @@ class ChatClient(discord.Client):
 
     def query(self, payload):
         response = requests.post(self.API_URL, headers=self.headers, json=payload)
-        print(response)
+        print(response.content)
         return response.json()
 
     def setup_prompt(self,p,key):
