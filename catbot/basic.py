@@ -44,9 +44,8 @@ class BasicClient(discord.Client):
         if message.reference is not None:
             a_reply = True
             reply = await message.channel.fetch_message(message.reference.message_id)
-            if(reply.author.id == bot.user.id):
+            if(reply.author.id == self.user.id):
                 replied = True
-
 
         if message.content.startswith('csay '):
             text = message.content.replace("csay ", '', 1)
