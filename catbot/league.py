@@ -16,13 +16,16 @@ class LeagueClient(discord.Client):
         roster = soup.find(class_="champion_roster")
         champs = roster.find_all("li")
         champlist = []
+        lolchamps = []
         for i, champ in enumerate(champs):
             c_ = champ.find("span")
             c=c_["data-champion"]
             img = c_.find("a").find("img")["data-src"]
             #print(img["data-src"])
             champlist.append([c,img])
+            lolchamps.append(c)
         self.champlist = champlist
+        self.lolchamps = lolchamps
     async def on_ready(self):
         print('catbot-league incoming... ')
         channel = self.get_channel(796072509039837207)
@@ -43,6 +46,36 @@ class LeagueClient(discord.Client):
             e.set_image(url=c[1])
             e.set_footer(text=c[0])
             await message.channel.send(embed=e)
+        if message.content.startswith("cskin"):
+            champ = message.content[len("cskin"):].strip()
+            
+            if champ == "":
+                nice = random.choice(self.lolchamps)
+                inp = "_".join((nice).split())
+
+            else:
+                i = [word.capitalize() for word in champ.strip().split()]
+                nice = " ".join(i)
+                inp = '_'.join(i)
+            
+            if(nice in self.lolchamps):
+                url = f"https://leagueoflegends.fandom.com/wiki/{inp}/LoL/Cosmetics"
+
+                htmldoc = requests.get(url).content.decode("utf-8")
+                soup = BeautifulSoup(htmldoc, 'html.parser')
+
+                skins = soup.find_all("div",class_="skin-icon")
+                skin = random.choice(skins)
+                imgs = skin.find("a")["href"]
+                name = skin.find("img")["data-image-name"]
+                e=discord.Embed(color=discord.Colour.light_gray())
+                e.set_image(url=imgs)
+                e.set_footer(text=name)
+                await message.channel.send(embed=e)
+            else:
+                await message.channel.send("Sorry I don't know that champ :3")
+        
+
             
 
 LeagueClient(intents=discord.Intents.all()).run(token.discordtoken)
