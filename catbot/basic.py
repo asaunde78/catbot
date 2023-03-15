@@ -1,6 +1,9 @@
 import discord, asyncio, random
 from token_folder import token
 
+
+import requests
+import json
 import subprocess
 import sys
 
