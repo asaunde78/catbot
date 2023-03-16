@@ -8,6 +8,7 @@ class ChatClient(discord.Client):
     def __init__(self,*args,**kwargs):
         super().__init__(*args,**kwargs)
         self.API_URL = "https://api-inference.huggingface.co/models/EleutherAI/gpt-neox-20b"
+        
         self.headers = {"Authorization": "Bearer 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","return_full_text":"false"}
 
     def query(self, payload):
