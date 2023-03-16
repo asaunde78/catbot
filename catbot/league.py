@@ -4,6 +4,8 @@ from token_folder import token
 
 from bs4 import BeautifulSoup
 import requests
+import pathlib
+import os
 
 class LeagueClient(discord.Client):
     def __init__(self,*args,**kwargs):
@@ -74,6 +76,51 @@ class LeagueClient(discord.Client):
                 await message.channel.send(embed=e)
             else:
                 await message.channel.send("Sorry I don't know that champ :3")
+        if message.content.startswith("caudio"):
+
+            champ = message.content[len("caudio"):].strip()
+            
+            if champ == "":
+                nice = random.choice(self.lolchamps)
+                inp = "_".join((nice).split())
+
+            else:
+                i = [word.capitalize() for word in champ.strip().split()]
+                nice = " ".join(i)
+                inp = '_'.join(i)
+            
+            if(nice in self.lolchamps):
+                url = f"https://leagueoflegends.fandom.com/wiki/{inp}/LoL/Audio"
+                #print(url)
+                htmldoc = requests.get(url).content.decode("utf-8")
+                soup = BeautifulSoup(htmldoc, 'html.parser')
+                
+                audios = soup.find_all("li")
+                name = [[audio.find("i"), audio.find("audio")] for audio in audios]
+
+                a = []
+                for val in name:
+                    if not None in val:
+                        a.append(val)
+                audio = random.choice(a)
+                #audio["value"]
+                #print(a)
+                name = "_".join(audio[0].text.split())
+                file_name = f"{name}" +".ogg"
+                audio = audio[1]["src"]
+
+
+                with requests.get(audio, allow_redirects=True) as response, open(file_name, 'wb') as f:
+                    #print(response.text)
+                    data = response.content
+                    f.write(data)
+                    await message.channel.send(file=discord.File(file_name))
+                pathlib.Path(file_name).unlink(missing_ok=True)
+                
+            else:
+                await message.channel.send("Sorry I don't know that champ :3")
+            #-------
+            
         
 
             
