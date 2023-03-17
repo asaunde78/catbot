@@ -4,32 +4,43 @@ from token_folder import token
 
 import requests
 import json
-import subprocess
-import sys
+
+import argparse
+import os
+ap = argparse.ArgumentParser()
+ap.add_argument("-s","--source", help="the source message id")
+args = ap.parse_args()
+if args.source:
+    source = int(args.source)
+else:
+    source = -1
 
 
 class BasicClient(discord.Client):
-    def __init__(self,*args,**kwargs):
+    def __init__(self,source,*args,**kwargs):
         super().__init__(*args,**kwargs)
         self.letters = {'a': '🇦', 'b': '🇧', 'c': '🇨', 'd': '🇩', 'e': '🇪', 'f': '🇫', 'g': '🇬', 'h': '🇭', 'i': '🇮', 'j': '🇯', 'k': '🇰', 'l': '🇱', 'm': '🇲', 'n': '🇳', 'o': '🇴', 'p': '🇵', 'q': '🇶', 'r': '🇷', 's': '🇸', 't': '🇹', 'u': '🇺', 'v': '🇻', 'w': '🇼', 'x': '🇽', 'y': '🇾', 'z': '🇿'}
         self.word = 'nice'
-        self.greetings = ["MIAOU!", "CatBot reporting for duty!", "CatBot back online!","CatSystems turning on...", "I am a CatBot", "Miaou!", "CatOS loading..."]
-        self.responses = ["! I'm CatBot!", "! You rang?", "! That's my name. Don't wear it out!", "! Did you just say my name?", ""]
         self.intros = ["Hi, ", "Yo yo, ", "Wazaaa, ", "What's up, ", "Yo, "]
         self.answers = ["Yes!! :3","No.. :( Sorry :3","Ask again later... mrow :3","Hmm... I'm not sure. :3","Oh for sure ;3","No way, dude!! :3","I'm just a cat! idk! :3","Kitty say is: YES!!! :3","Kitty say is: NO!!!!! ;3"]
+        self.name = os.path.basename(__file__).strip(".py")
+        self.source_message = source
 
     async def on_ready(self):
-        await tree.sync(guild=discord.Object(id=token.guild))
-        print('logged in as')
-        print(self.user.name)
-        print(self.user.id)
-        print('--------------')
-        game = discord.Game('miaou')
-        await self.change_presence(status=discord.Status.online, activity=game)
+        #print('catbot-basic incoming... ')
+        #channel = self.get_channel(796072509039837207)
+        #await channel.send("catbot-basic on")
         channel = self.get_channel(796072509039837207)
-        
-        ip = subprocess.check_output("hostname -I".split()).decode().strip("\n")
-        await channel.send(random.choice(self.greetings)+ "\n IP: asher@" +ip)
+        #await channel.send("catbot-template on")
+        if not source == -1:
+            message = await channel.fetch_message(self.source_message)
+            await message.add_reaction("😂")
+            e = discord.Embed(title=message.embeds[0].title)
+            
+            e.set_footer(text=message.embeds[0].footer.text.replace(f"Waiting for: {self.name}",f"{self.name} on!"))
+            await message.edit(embed=e)
+        else:
+            await channel.send(f"catbot-{self.name} on")
     
     async def on_message(self,message):
          
@@ -89,14 +100,7 @@ class BasicClient(discord.Client):
                 
                 await message.channel.send(random.choice(self.intros)+ message.author.mention + random.choice(self.responses))
 
-client = BasicClient(intents=discord.Intents.all())
-tree = discord.app_commands.CommandTree(client)
+client = BasicClient(source,intents=discord.Intents.all())
 
-@tree.command(name="ping",description="pings the bot :3",guild = discord.Object(id=token.guild))
-async def ping(interaction):
-    await interaction.response.send_message("Pong")
-@tree.context_menu(name="hehe",guild =discord.Object(id=token.guild))
-async def hehe(interaction: discord.Interaction, msg: discord.Message):
-    await interaction.response.send_message(":thumbsup:")
 
 client.run(token.discordtoken)
