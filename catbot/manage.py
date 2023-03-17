@@ -48,7 +48,7 @@ class ManageClient(discord.Client):
         print(announce.id)
         await announce.add_reaction("✅")
 
-        os.system("pkill screen")
+        #os.system("pkill screen")
         for bot in self.bots:
             os.system(f"./run.sh {bot} {str(announce.id)}")
 
