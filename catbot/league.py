@@ -39,6 +39,15 @@ class LeagueClient(discord.Client):
         self.champlist = champlist
         self.lolchamps = lolchamps
 
+        url = "https://leagueoflegends.fandom.com/wiki/Item_(League_of_Legends)"
+        htmldoc = requests.get(url).content.decode("utf-8")
+        soup = BeautifulSoup(htmldoc, 'html.parser')
+        cats = soup.find_all("dl")
+        categories = [c.find("a") if c.find("a") == None else c.find("a")["title"] for c in cats if c.find("a") is not None]
+        self.links = {cat:"_".join(cat.split()) for cat in categories}
+
+
+
         self.name = os.path.basename(__file__).strip(".py")
         self.source_message = source
     async def on_ready(self):
@@ -144,6 +153,50 @@ class LeagueClient(discord.Client):
             else:
                 await message.channel.send("Sorry I don't know that champ :3")
             #-------
+        if message.content.startswith("citem"):
+            
+            #while 1:
+             #   await message.channel.send("CUNT CUNT CUNT CUNT CUNT CUNT CUNT") #heh, u just got trolled...
+            #print(message.content)
+
+            cont = message.content[len("citem"):].strip().lower()
+            if(cont == "--help"):
+                await message.channel.send(", ".join(list(self.links.keys())).replace(" item",""))
+
+                return
+            #print(cont)
+            cont = (cont.lower() + " item").capitalize()
+            #print(cont,self.links)
+            if cont in self.links.keys():
+                #print("finding hehe")
+                c = self.links[cont]
+            else:
+                c = random.choice(list(self.links.values()))
+
+            base = "https://leagueoflegends.fandom.com/wiki/"
+
+            print(c)
+            url = base + c
+            htmldoc = requests.get(url).content.decode("utf-8")
+            soup = BeautifulSoup(htmldoc, 'html.parser')
+            soup = soup.find("div",class_="columntemplate")
+            raw_items = soup.find_all("li")
+            b = []
+            for item in raw_items:
+                i = item.find("a")
+                if i:
+                    i2 = i.find("img")
+                    if i2:
+                        b.append(i2)
+            item = random.choice(b)
+            try:
+                e = discord.Embed()
+                e.set_footer(text=item["alt"])
+                e.set_image(url=item["data-src"])
+                await message.channel.send(embed=e)
+            except KeyError as e:
+                print(e)
+                await message.channel.send("BRAINFART XD :3 ooopsies I did a bad...  :3")
             
         
 

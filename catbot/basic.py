@@ -1,7 +1,7 @@
 import discord, asyncio, random
 from token_folder import token
 
-
+#😂😂😂😂😂
 import requests
 import json
 
@@ -15,7 +15,7 @@ if args.source:
 else:
     source = -1
 
-
+#😂😂😂😂
 class BasicClient(discord.Client):
     def __init__(self,source,*args,**kwargs):
         super().__init__(*args,**kwargs)
@@ -104,3 +104,6 @@ client = BasicClient(source,intents=discord.Intents.all())
 
 
 client.run(token.discordtoken)
+
+
+#😂 signed -😂
