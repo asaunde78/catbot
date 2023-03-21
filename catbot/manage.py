@@ -25,7 +25,7 @@ class ManageClient(discord.Client):
         else:
             self.bots = ["chat", "league","basic","time"]
     async def on_ready(self):
-        #await tree.sync(guild=discord.Object(id=token.guild))
+        
         print('logged in as')
         print(self.user.name)
         print(self.user.id)
@@ -58,6 +58,8 @@ class ManageClient(discord.Client):
          
         if message.author.id == self.user.id or message.author.id == 493938037189902358:
             return
+        if message.content.startswith("csync") and message.author.id == 179741296464887808:
+            await tree.sync(guild=discord.Object(id=token.guild))
         
 client = ManageClient(test,intents=discord.Intents.all())
 tree = discord.app_commands.CommandTree(client)
