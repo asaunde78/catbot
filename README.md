@@ -11,5 +11,7 @@ The bot is designed around a main catbot.py and various cogs that grant catbot i
 - chatcat: A cog that makes calls to the HuggingFace API to respond in a semi-natural way to users on the server.
 - plainkitty: A cog that provides very basic catbot functions such as gifs, reactions, and 'csay.'
 
+## Future
 
+I plan to add a lot of stuff! I'm going to add way more league features, as well as some stuff with ImageMagick! Very excitin stuff.
 
