@@ -1,109 +1,77 @@
-import discord, asyncio, random
-from token_folder import token
+import discord
+from discord.ext import commands
+from discord import app_commands
+import random
 
-#😂😂😂😂😂
-import requests
-import json
-
-import argparse
-import os
-ap = argparse.ArgumentParser()
-ap.add_argument("-s","--source", help="the source message id")
-args = ap.parse_args()
-if args.source:
-    source = int(args.source)
-else:
-    source = -1
-
-#😂😂😂😂
-class BasicClient(discord.Client):
-    def __init__(self,source,*args,**kwargs):
-        super().__init__(*args,**kwargs)
+class Plaincat(commands.Cog):
+    def __init__(self, bot: commands.Bot):
+        self.bot = bot
+        self.guild = self.bot.myguild
         self.letters = {'a': '🇦', 'b': '🇧', 'c': '🇨', 'd': '🇩', 'e': '🇪', 'f': '🇫', 'g': '🇬', 'h': '🇭', 'i': '🇮', 'j': '🇯', 'k': '🇰', 'l': '🇱', 'm': '🇲', 'n': '🇳', 'o': '🇴', 'p': '🇵', 'q': '🇶', 'r': '🇷', 's': '🇸', 't': '🇹', 'u': '🇺', 'v': '🇻', 'w': '🇼', 'x': '🇽', 'y': '🇾', 'z': '🇿'}
         self.word = 'nice'
+        self.greetings = ["MIAOU!", "CatBot reporting for duty!", "CatBot back online!","CatSystems turning on...", "I am a CatBot", "Miaou!", "CatOS loading..."]
+        self.responses = ["! I'm CatBot!", "! You rang?", "! That's my name. Don't wear it out!", "! Did you just say my name?", ""]
         self.intros = ["Hi, ", "Yo yo, ", "Wazaaa, ", "What's up, ", "Yo, "]
         self.answers = ["Yes!! :3","No.. :( Sorry :3","Ask again later... mrow :3","Hmm... I'm not sure. :3","Oh for sure ;3","No way, dude!! :3","I'm just a cat! idk! :3","Kitty say is: YES!!! :3","Kitty say is: NO!!!!! ;3"]
-        self.name = os.path.basename(__file__).strip(".py")
-        self.source_message = source
-
-    async def on_ready(self):
-        #print('catbot-basic incoming... ')
-        #channel = self.get_channel(796072509039837207)
-        #await channel.send("catbot-basic on")
-        channel = self.get_channel(796072509039837207)
-        #await channel.send("catbot-template on")
-        if not source == -1:
-            message = await channel.fetch_message(self.source_message)
-            await message.add_reaction("😂")
-            e = discord.Embed(title=message.embeds[0].title)
-            
-            e.set_footer(text=message.embeds[0].footer.text.replace(f"Waiting for: {self.name}",f"{self.name} on!"))
-            await message.edit(embed=e)
-        else:
-            await channel.send(f"catbot-{self.name} on")
-    
+    @commands.Cog.listener()
     async def on_message(self,message):
-         
-        if message.author.id == self.user.id or message.author.id == 493938037189902358:
+        if message.author.id == self.bot.user.id or message.author.id == 493938037189902358:
             return
         msg = message.content.split()
         print(message.author.display_name+": "+ message.content)
-        
-        replied = False
-        a_reply = False
-        
-        if message.reference is not None:
-            a_reply = True
-            reply = await message.channel.fetch_message(message.reference.message_id)
-            if(reply.author.id == self.user.id):
-                replied = True
-
-        if message.content.startswith('csay '):
-            text = message.content.replace("csay ", '', 1)
-            await message.delete()
-            if(a_reply):
-                await reply.reply(text)
-            else:
-                await message.channel.send(text)
-
-
-        if message.content.startswith('question: '):
-            question = message.content[len('question: '):]
-            random.seed(abs(hash(question)))
-            out = random.choice(self.answers)
-            random.seed()
-            await message.channel.send(out)
-
-
-        if message.content.startswith('change word '):
-            self.word = message.content.replace('change word ','')
-
-
-        if message.content.startswith('g '):
-            gif = message.content.replace('g ', '', 1)
-            gif = ''.join(gif)
-            params = {'q':gif}
-            params['key']=token.tenortoken
-            #params['q']="hello"
-
-            response = requests.get("https://api.tenor.co/v2/search",params = params)
-            results = json.loads(response.text)
-            #['media'][0]['gif']['url']
-            await message.channel.send(random.choice(results['results'])['itemurl'])
-
         for item in msg:
-            if item.upper() == self.word.upper() or item == self.user.mention:
+            if item.upper() == self.word.upper() or item == self.bot.user.mention:
                 for a in list(self.word):
                     if(a in self.letters):
                         await message.add_reaction(self.letters[a])
-            if item == self.user.mention:
+            if item == self.bot.user.mention:
                 
                 await message.channel.send(random.choice(self.intros)+ message.author.mention + random.choice(self.responses))
+    @app_commands.command(name="csay")
+    async def csay(
+        self,
+        interaction: discord.Interaction,
+        message: str
+    ) -> None:
+        await interaction.channel.send(message)
+    @app_commands.command(name="question")
+    @app_commands.rename(query="question")
+    async def question(
+        self,
+        interaction: discord.Interaction,
+        query: str
+    ) -> None:
+        random.seed(abs(hash(query)))
+        out = random.choice(self.answers)
+        random.seed()
+        await interaction.response.send_message(out)
+    
+    @app_commands.command(name="change-word")
+    async def changeword(
+        self,
+        interaction: discord.Interaction,
+        word: str
+    ) -> None:
+        self.word = word
+        await interaction.response.send_message(f"Changed word to {word}")
 
-client = BasicClient(source,intents=discord.Intents.all())
+    # @app_commands.command(name="gif")
+    # async def gif(
+    #     self,
+    #     interaction: discord.Interaction,
+    #     query: str
+    # ) -> None:
+    #     params = {'q':gif}
+    #     params['key']=bot.token.tenortoken
+    #     #params['q']="hello"
+    #     response = requests.get("https://api.tenor.co/v2/search",params = params)
+    #     results = json.loads(response.text)
+    #     #['media'][0]['gif']['url']
+    #     await interaction.response.send_message(random.choice(results['results'])['itemurl'])
 
 
-client.run(token.discordtoken)
-
-
-#😂 signed -😂
+    
+async def setup(bot: commands.Bot):
+    await bot.add_cog(Plaincat(bot))
+    #print(f"Guild: {bot.myguild}")
+    print("plaincat loaded")
