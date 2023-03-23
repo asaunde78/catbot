@@ -2,11 +2,14 @@ import discord
 from discord.ext import commands
 from discord import app_commands
 import random
+import requests
+import json
 
 class Plaincat(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
         self.guild = self.bot.myguild
+        self.tenortoken = bot.tenortoken
         self.letters = {'a': '🇦', 'b': '🇧', 'c': '🇨', 'd': '🇩', 'e': '🇪', 'f': '🇫', 'g': '🇬', 'h': '🇭', 'i': '🇮', 'j': '🇯', 'k': '🇰', 'l': '🇱', 'm': '🇲', 'n': '🇳', 'o': '🇴', 'p': '🇵', 'q': '🇶', 'r': '🇷', 's': '🇸', 't': '🇹', 'u': '🇺', 'v': '🇻', 'w': '🇼', 'x': '🇽', 'y': '🇾', 'z': '🇿'}
         self.word = 'nice'
         self.greetings = ["MIAOU!", "CatBot reporting for duty!", "CatBot back online!","CatSystems turning on...", "I am a CatBot", "Miaou!", "CatOS loading..."]
@@ -27,15 +30,17 @@ class Plaincat(commands.Cog):
             if item == self.bot.user.mention:
                 
                 await message.channel.send(random.choice(self.intros)+ message.author.mention + random.choice(self.responses))
-    @app_commands.command(name="csay")
+    @app_commands.command(name="csay",description="Makes catbot say whatever you want!")
     async def csay(
         self,
         interaction: discord.Interaction,
         message: str
     ) -> None:
+        await interaction.response.send_message("Okay I'll say that :3",ephemeral=True)
         await interaction.channel.send(message)
-    @app_commands.command(name="question")
-    @app_commands.rename(query="question")
+
+
+    @app_commands.command(name="question",description="Magic 8-Ball style answers the given question")
     async def question(
         self,
         interaction: discord.Interaction,
@@ -46,7 +51,7 @@ class Plaincat(commands.Cog):
         random.seed()
         await interaction.response.send_message(out)
     
-    @app_commands.command(name="change-word")
+    @app_commands.command(name="change-word",description="Changes the \"Word of the Day\"")
     async def changeword(
         self,
         interaction: discord.Interaction,
@@ -55,19 +60,20 @@ class Plaincat(commands.Cog):
         self.word = word
         await interaction.response.send_message(f"Changed word to {word}")
 
-    # @app_commands.command(name="gif")
-    # async def gif(
-    #     self,
-    #     interaction: discord.Interaction,
-    #     query: str
-    # ) -> None:
-    #     params = {'q':gif}
-    #     params['key']=bot.token.tenortoken
-    #     #params['q']="hello"
-    #     response = requests.get("https://api.tenor.co/v2/search",params = params)
-    #     results = json.loads(response.text)
-    #     #['media'][0]['gif']['url']
-    #     await interaction.response.send_message(random.choice(results['results'])['itemurl'])
+    @app_commands.command(name="gif",description="Sends a gif using the given query")
+    async def gif(
+        self,
+        interaction: discord.Interaction,
+        query: str
+    ) -> None:
+        params = {'q':query}
+        params['key']=self.tenortoken
+        print(params)
+        #params['q']="hello"
+        response = requests.get("https://api.tenor.co/v2/search",params = params)
+        results = json.loads(response.text)
+        #['media'][0]['gif']['url']
+        await interaction.response.send_message(random.choice(results['results'])['itemurl'])
 
 
     
