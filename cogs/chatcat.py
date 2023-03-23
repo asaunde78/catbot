@@ -3,12 +3,18 @@ from discord.ext import commands
 from discord import app_commands
 import requests
 import json
+
+
+name = "chatcat"
 class Chatcat(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
         self.API_URL = "https://api-inference.huggingface.co/models/EleutherAI/gpt-neox-20b"
         
         self.headers = {"Authorization": "Bearer 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","return_full_text":"false"}
+    # @commands.Cog.listener()
+    # async def on_ready(self):
+    #     print(self.bot.message)
     @commands.Cog.listener()
     async def on_message(self,message):
         if message.author.id == self.bot.user.id or message.author.id == 493938037189902358:
@@ -82,6 +88,15 @@ class Chatcat(commands.Cog):
             return out
     
 async def setup(bot: commands.Bot):
-    
+    global name
     await bot.add_cog(Chatcat(bot))
-    print("chatcat loaded")
+    
+    print(f"{name} loaded")
+
+    channel = bot.get_channel(796072509039837207)
+    message = await channel.fetch_message(bot.message)
+    await message.add_reaction("🗣️")
+    e = discord.Embed(title=message.embeds[0].title)
+    
+    e.set_footer(text=message.embeds[0].footer.text.replace(f"Waiting for: {name}",f"{name} on!"))
+    await message.edit(embed=e)

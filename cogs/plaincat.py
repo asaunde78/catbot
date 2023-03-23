@@ -4,18 +4,21 @@ from discord import app_commands
 import random
 import requests
 import json
-
+name = "plaincat"
 class Plaincat(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
+        
         self.guild = self.bot.myguild
         self.tenortoken = bot.tenortoken
         self.letters = {'a': '🇦', 'b': '🇧', 'c': '🇨', 'd': '🇩', 'e': '🇪', 'f': '🇫', 'g': '🇬', 'h': '🇭', 'i': '🇮', 'j': '🇯', 'k': '🇰', 'l': '🇱', 'm': '🇲', 'n': '🇳', 'o': '🇴', 'p': '🇵', 'q': '🇶', 'r': '🇷', 's': '🇸', 't': '🇹', 'u': '🇺', 'v': '🇻', 'w': '🇼', 'x': '🇽', 'y': '🇾', 'z': '🇿'}
         self.word = 'nice'
-        self.greetings = ["MIAOU!", "CatBot reporting for duty!", "CatBot back online!","CatSystems turning on...", "I am a CatBot", "Miaou!", "CatOS loading..."]
         self.responses = ["! I'm CatBot!", "! You rang?", "! That's my name. Don't wear it out!", "! Did you just say my name?", ""]
         self.intros = ["Hi, ", "Yo yo, ", "Wazaaa, ", "What's up, ", "Yo, "]
         self.answers = ["Yes!! :3","No.. :( Sorry :3","Ask again later... mrow :3","Hmm... I'm not sure. :3","Oh for sure ;3","No way, dude!! :3","I'm just a cat! idk! :3","Kitty say is: YES!!! :3","Kitty say is: NO!!!!! ;3"]
+    # @commands.Cog.listener()
+    # async def on_ready(self):
+    #     print(self.bot.message)
     @commands.Cog.listener()
     async def on_message(self,message):
         if message.author.id == self.bot.user.id or message.author.id == 493938037189902358:
@@ -78,6 +81,17 @@ class Plaincat(commands.Cog):
 
     
 async def setup(bot: commands.Bot):
+    global name
     await bot.add_cog(Plaincat(bot))
     #print(f"Guild: {bot.myguild}")
-    print("plaincat loaded")
+
+    print(f"{name} loaded")
+
+    channel = bot.get_channel(796072509039837207)
+    message = await channel.fetch_message(bot.message)
+    await message.add_reaction("🐱")
+    e = discord.Embed(title=message.embeds[0].title)
+    
+    e.set_footer(text=message.embeds[0].footer.text.replace(f"Waiting for: {name}",f"{name} on!"))
+    await message.edit(embed=e)
+    

@@ -5,13 +5,19 @@ from discord.ext import commands
 from token_folder import token
 from discord.ext.commands import Greedy,Context
 from discord import app_commands
-import os 
+import random 
+import os
+import subprocess
 
 class catbot(commands.Bot):
     def __init__(self,*args,**kwargs):
         super().__init__(*args,**kwargs)
+        self.greetings = ["MIAOU!", "CatBot reporting for duty!", "CatBot back online!","CatSystems turning on...", "I am a CatBot", "Miaou!", "CatOS loading..."]
+        
         self.myguild = token.guild
         self.tenortoken = token.tenortoken
+        self.message = 0
+        self.bots = []
 
 client = catbot(command_prefix="~",intents=discord.Intents.all())
 
@@ -64,6 +70,12 @@ async def fetch(
     #ctx.bot.tree.sync()
     await ctx.channel.send(f"Featched {c}")
 
+async def find_cogs():
+    for filename in os.listdir("./cogs"):
+        if filename.endswith(".py"):
+            cog = filename[:-3]
+            client.bots.append(cog)
+
 async def load_cogs():
     for filename in os.listdir("./cogs"):
         if filename.endswith(".py"):
@@ -71,7 +83,24 @@ async def load_cogs():
 
 @client.event
 async def on_ready():
-    print("Catbot getting ready")
+    print('logged in as')
+    print(client.user.name)
+    print(client.user.id)
+    print('--------------')
+    game = discord.Game('miaou')
+    await client.change_presence(status=discord.Status.online, activity=game)
+    channel = client.get_channel(796072509039837207)
+    ip = subprocess.check_output("hostname -I".split()).decode().strip("\n")
+
+    e=discord.Embed(title=random.choice(client.greetings))
+    await find_cogs()
+    print(client.bots)
+    e.set_footer(text="IP: asher@" +ip +"\n" + '\n'.join(["Waiting for: " + bot for bot in client.bots]))
+    announce = await channel.send(embed=e)
+    client.message = announce.id
+
     await load_cogs()
+
+    
 
 client.run(token.discordtoken)

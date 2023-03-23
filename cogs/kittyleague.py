@@ -5,6 +5,7 @@ import json
 from typing import List 
 import random
 
+name = "kittyleague"
 class Kittyleague(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
@@ -18,7 +19,9 @@ class Kittyleague(commands.Cog):
 
     def getRole(self, role):
         return [name for name,champ in self.champs["Champions"].items() if role in champ["Info"]["Position(s)"] ]
-    
+    # @commands.Cog.listener()
+    # async def on_ready(self):
+    #     print(self.bot.message)
     @app_commands.command(name="league-team",description="Generates a league of legends team")
     async def cteam(
         self,
@@ -61,6 +64,15 @@ class Kittyleague(commands.Cog):
 
     
 async def setup(bot: commands.Bot):
-    
+    global name
     await bot.add_cog(Kittyleague(bot))
-    print("kittyleague loaded")
+    
+    print(f"{name} loaded")
+
+    channel = bot.get_channel(796072509039837207)
+    message = await channel.fetch_message(bot.message)
+    await message.add_reaction("🎮")
+    e = discord.Embed(title=message.embeds[0].title)
+    
+    e.set_footer(text=message.embeds[0].footer.text.replace(f"Waiting for: {name}",f"{name} on!"))
+    await message.edit(embed=e)
