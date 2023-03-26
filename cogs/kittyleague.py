@@ -5,7 +5,8 @@ import json
 from typing import List 
 import random
 
-name = "kittyleague"
+import os
+name = os.path.splitext(os.path.basename(__file__))[0]
 class Kittyleague(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot

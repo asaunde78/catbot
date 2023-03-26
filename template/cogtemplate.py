@@ -1,7 +1,8 @@
 import discord
 from discord.ext import commands
 from discord import app_commands
-name = "template"
+import os
+name = os.path.splitext(os.path.basename(__file__))[0]
 class Template(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot

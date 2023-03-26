@@ -4,14 +4,31 @@ from discord import app_commands
 import requests
 import json
 
-
-name = "chatcat"
+import os
+name = os.path.splitext(os.path.basename(__file__))[0]
 class Chatcat(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
         self.API_URL = "https://api-inference.huggingface.co/models/EleutherAI/gpt-neox-20b"
         
         self.headers = {"Authorization": "Bearer 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","return_full_text":"false"}
+        self.ctx_menu = app_commands.ContextMenu(
+                name = "creply",
+                callback=self.creply
+            )
+        self.bot.tree.add_command(self.ctx_menu)
+    async def creply(
+        self,
+        interaction: discord.Interaction,
+        message: discord.Message,
+    ):
+        await interaction.response.defer(ephemeral=True)#send_message("Loading...")
+        text = self.gentext(self.setup_prompt(message.content,"chatbot"))
+        if(len(text.strip()) == 0):
+            text = "`api didn't return anything lol`"
+        #await interaction.followup.send(text)
+        await interaction.followup.send("Done!")
+        await message.reply(text)
     # @commands.Cog.listener()
     # async def on_ready(self):
     #     print(self.bot.message)

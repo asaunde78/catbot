@@ -4,7 +4,8 @@ from discord import app_commands
 import random
 import requests
 import json
-name = "plaincat"
+import os
+name = os.path.splitext(os.path.basename(__file__))[0]
 class Plaincat(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
@@ -16,6 +17,8 @@ class Plaincat(commands.Cog):
         self.responses = ["! I'm CatBot!", "! You rang?", "! That's my name. Don't wear it out!", "! Did you just say my name?", ""]
         self.intros = ["Hi, ", "Yo yo, ", "Wazaaa, ", "What's up, ", "Yo, "]
         self.answers = ["Yes!! :3","No.. :( Sorry :3","Ask again later... mrow :3","Hmm... I'm not sure. :3","Oh for sure ;3","No way, dude!! :3","I'm just a cat! idk! :3","Kitty say is: YES!!! :3","Kitty say is: NO!!!!! ;3"]
+        
+
     # @commands.Cog.listener()
     # async def on_ready(self):
     #     print(self.bot.message)
@@ -54,6 +57,7 @@ class Plaincat(commands.Cog):
         random.seed()
         await interaction.response.send_message(out)
     
+
     @app_commands.command(name="change-word",description="Changes the \"Word of the Day\"")
     async def changeword(
         self,
