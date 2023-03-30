@@ -14,6 +14,7 @@ class Kittyleague(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
         self.myguild = bot.myguild
+        
         with open("/home/asher/leagueapi/champs/champs.json", "r") as r:
             self.champs = json.load(r)
         with open("/home/asher/leagueapi/champs/aliases.json", "r") as r:
@@ -23,8 +24,10 @@ class Kittyleague(commands.Cog):
         with open("/home/asher/leagueapi/audio/audios.json", "r") as r:
             self.audios = json.load(r)
 
+        
+
     def getRole(self, role):
-        return [name for name,champ in self.champs["Champions"].items() if role in champ["Info"]["Position(s)"] ]
+        return [name for name,champ in self.champs.items() if role in champ["Info"]["Position(s)"] ]
     # @commands.Cog.listener()
     # async def on_ready(self):
     #     print(self.bot.message)
@@ -48,20 +51,34 @@ class Kittyleague(commands.Cog):
     @app_commands.command(name="send-quote",description="Sends a video containing a picture of the champ and them saying the quote")
     async def sendquote(
         self,
-        interaction : discord.Interaction
+        interaction : discord.Interaction,
+        champ: str = None
+
     ):      
         await interaction.response.defer()
-        champ = random.choice(list(self.audios.items()))
-        line = random.choice(list(champ[1].items()))
-        # print(,,)
-        name = champ[0]
+        #champ = "Kalista"
+        
+        if(champ):
+            name = self.aliases[champ.lower()]
+            line = random.choice(list(self.audios[name].items()))
+            # quote = line[0]
+
+        else:
+            c = random.choice(list(self.audios.items()))
+
+            line = random.choice(list(c[1].items()))
+
+            name = c[0]
+        with open("leaguecontents/" + f"{name}"+".mp4", "w") as r:
+            r.write(" ")
         quote = line[0]
-        link = list(line[1]["Files"].values())[0]
+        skinlink = random.choice(list(line[1]["Files"].items()))
+        skin,link = skinlink
 
-
+        print("Skin: ", skin)
         file_name = f"{quote}" +".ogg"
         # link = audios[champ][quote]["Files"]["Original"]
-        pic = self.champs["Champions"][name]["banner-link"]
+        pic = self.champs[name]["Skins"][skin]["Splash"]
         pic_file = f"{name}" + ".jpg"
         with requests.get(link, allow_redirects=True) as response, open("leaguecontents/" + file_name, 'wb') as f:
             #print(response.text)
@@ -76,7 +93,7 @@ class Kittyleague(commands.Cog):
         video_clip = image_clip.set_audio(audio_clip)
         video_clip.duration = audio_clip.duration
         video_clip.fps = 1
-        txt_clip = TextClip(quote,method="caption",color="white",size=(1215,150))
+        txt_clip = TextClip(quote+"\n-"+name,method="caption",color="white",size=(1215,150))
 
 
         txt_clip = txt_clip.set_pos("center").set_duration(audio_clip.duration)
@@ -103,9 +120,10 @@ class Kittyleague(commands.Cog):
         interaction,
         champ: str
     ):
-        await interaction.response.send_message(self.champs["Champions"][self.aliases[champ.lower()]]["champ-render"],ephemeral=True)
+        await interaction.response.send_message(self.champs[self.aliases[champ.lower()]]["champ-render"],ephemeral=True)
 
     @champrender.autocomplete("champ")
+    @sendquote.autocomplete("champ")
     async def champ_autocomple(
         self,
         interaction: discord.Interaction,
@@ -113,9 +131,11 @@ class Kittyleague(commands.Cog):
     ) -> List[app_commands.Choice[str]]:
         champs = list(self.aliases.keys())
         return [
-            app_commands.Choice(name=self.aliases[champ],value=champ)
+            app_commands.Choice(name=self.aliases[champ],value=self.aliases[champ])
             for champ in champs if current.lower() in champ.lower()
         ]
+        
+
     
 
 
