@@ -4,6 +4,9 @@ from discord import app_commands
 import json
 from typing import List 
 import random
+from moviepy.editor import AudioFileClip, ImageClip, CompositeVideoClip, TextClip
+import requests
+import pathlib
 
 import os
 name = os.path.splitext(os.path.basename(__file__))[0]
@@ -17,6 +20,8 @@ class Kittyleague(commands.Cog):
             self.aliases = json.load(r)
         with open("/home/asher/leagueapi/items/items.json", "r") as r:
             self.items = json.load(r)
+        with open("/home/asher/leagueapi/audio/audios.json", "r") as r:
+            self.audios = json.load(r)
 
     def getRole(self, role):
         return [name for name,champ in self.champs["Champions"].items() if role in champ["Info"]["Position(s)"] ]
@@ -40,6 +45,56 @@ class Kittyleague(commands.Cog):
                     champ = temp
                     team[order[x]] = champ
         await interaction.response.send_message(team)
+    @app_commands.command(name="send-quote",description="Sends a video containing a picture of the champ and them saying the quote")
+    async def sendquote(
+        self,
+        interaction : discord.Interaction
+    ):      
+        await interaction.response.defer()
+        champ = random.choice(list(self.audios.items()))
+        line = random.choice(list(champ[1].items()))
+        # print(,,)
+        name = champ[0]
+        quote = line[0]
+        link = list(line[1]["Files"].values())[0]
+
+
+        file_name = f"{quote}" +".ogg"
+        # link = audios[champ][quote]["Files"]["Original"]
+        pic = self.champs["Champions"][name]["banner-link"]
+        pic_file = f"{name}" + ".jpg"
+        with requests.get(link, allow_redirects=True) as response, open("leaguecontents/" + file_name, 'wb') as f:
+            #print(response.text)
+            data = response.content
+            f.write(data)
+        with requests.get(pic,allow_redirects=True) as response, open("leaguecontents/" + pic_file, "wb") as f:
+            data = response.content
+            f.write(data)
+        audio_clip = AudioFileClip("leaguecontents/" + file_name)
+        image_clip = ImageClip("leaguecontents/" + pic_file)
+
+        video_clip = image_clip.set_audio(audio_clip)
+        video_clip.duration = audio_clip.duration
+        video_clip.fps = 1
+        txt_clip = TextClip(quote,method="caption",color="white",size=(1215,150))
+
+
+        txt_clip = txt_clip.set_pos("center").set_duration(audio_clip.duration)
+        video_clip = CompositeVideoClip([video_clip, txt_clip])
+        video_clip.duration = audio_clip.duration
+        video_clip.write_videofile("leaguecontents/" + f"{name}"+".mp4")
+
+        await interaction.followup.send(file=discord.File("leaguecontents/" + f"{name}"+".mp4"))
+
+        pathlib.Path("leaguecontents/" + file_name).unlink(missing_ok=True)
+        pathlib.Path("leaguecontents/" + pic_file).unlink(missing_ok=True)
+        # pathlib.Path("leaguecontents/" + f"{name}"+".mp4").unlink(missing_ok=True)
+    
+
+
+
+
+    
     #@tree.command(name="champ-pic",description="Sends a pic of the given champion!",guild=discord.Object(id=token.guild))
     #@app_commands.command()#autocomplete(champ=champ_autocomplete)
     @app_commands.command(name="champ-pic",description="Sends a pic of the given champion!")
@@ -61,6 +116,7 @@ class Kittyleague(commands.Cog):
             app_commands.Choice(name=self.aliases[champ],value=champ)
             for champ in champs if current.lower() in champ.lower()
         ]
+    
 
 
     
