@@ -79,7 +79,10 @@ async def cteam(interaction):
 #@tree.command(name="champ-pic",description="Sends a pic of the given champion!",guild=discord.Object(id=token.guild))
 #@app_commands.command()#autocomplete(champ=champ_autocomplete)
 @tree.command(name="champ-pic",description="Sends a pic of the given champion!",guild=discord.Object(id=token.guild))
-async def champrender(interaction, champ: str):
+async def champrender(
+    interaction,
+    champ: str
+ ):
     await interaction.response.send_message(client.champs["Champions"][client.aliases[champ.lower()]]["champ-render"],ephemeral=True)
 
 @champrender.autocomplete("champ")
@@ -92,9 +95,6 @@ async def champ_autocomple(
         app_commands.Choice(name=client.aliases[champ],value=champ)
         for champ in champs if current.lower() in champ.lower()
     ]
-
-
-
 
 
 client.run(token.discordtoken)
