@@ -153,7 +153,7 @@ class Kittyleague(commands.Cog):
         video_clip.duration = audio_clip.duration
         video_clip.fps = 1
         # txt_clip = TextClip(quote+"\n-"+name,method="caption",color="white",size=(1215,150))
-        txt_clip = TextClip(quote+"\n-"+name,stroke_width=2,stroke_color="black",method="caption",color="white",size=(1215,200),font="Roboto")
+        txt_clip = TextClip(quote+"\n-"+name,stroke_width=1.5,stroke_color="black",method="caption",color="white",size=(1215,250),font="Roboto")
 
 
         # txt_clip = txt_clip.set_pos("center").set_duration(audio_clip.duration)
