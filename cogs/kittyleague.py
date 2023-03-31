@@ -39,12 +39,12 @@ class Kittyleague(commands.Cog):
             for linequote,data in champaudio.items():
                 if(quote):
                     #print("hi")
-                    if quote not in linequote:
+                    if quote.lower() not in linequote.lower():
                         continue
                 if(tags):
                     skip = False
                     for tag in tags:
-                        if tag not in " ".join(data["Tags"]):
+                        if tag.lower() not in " ".join(data["Tags"]).lower():
                             #print(tag)
                             skip = True
                             break
@@ -87,6 +87,7 @@ class Kittyleague(commands.Cog):
                     team[order[x]] = champ
         await interaction.response.send_message(team)
     @app_commands.command(name="send-quote",description="Sends a video containing a picture of the champ and them saying the quote")
+    @app_commands.rename(quote="contains")
     async def sendquote(
         self,
         interaction : discord.Interaction,
