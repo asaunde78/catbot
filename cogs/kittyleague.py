@@ -1,4 +1,5 @@
 import discord
+import asyncio
 from discord.ext import commands
 from discord import app_commands
 import json
@@ -25,7 +26,44 @@ class Kittyleague(commands.Cog):
             self.audios = json.load(r)
 
         
-
+    def search(self, champ: str = None,tags: list =None,quote:str=None,skin:str=None):
+        result = {}
+        # if(champ):
+        #     return {champ:self.audios[champ]}
+        for name,champaudio in self.audios.items():
+            result[name] = {}
+            #print(name)
+            if(champ):
+                if not name == champ:
+                    continue
+            for linequote,data in champaudio.items():
+                if(quote):
+                    #print("hi")
+                    if quote not in linequote:
+                        continue
+                if(tags):
+                    skip = False
+                    for tag in tags:
+                        if tag not in " ".join(data["Tags"]):
+                            #print(tag)
+                            skip = True
+                            break
+                    if skip:
+                        continue
+                            
+                if(skin):
+                    #print("hi")
+                    if skin not in data["Files"]:
+                        continue
+                #print(linequote)
+                #print(data["Tags"])
+                result[name][linequote] = data
+            #print(result[name] if not name == "Aatrox" else "FART")
+        for name,r in list(result.items()):
+            if r == {}:
+                #print("hello?")
+                result.pop(name)
+        return result
     def getRole(self, role):
         return [name for name,champ in self.champs.items() if role in champ["Info"]["Position(s)"] ]
     # @commands.Cog.listener()
@@ -52,33 +90,53 @@ class Kittyleague(commands.Cog):
     async def sendquote(
         self,
         interaction : discord.Interaction,
-        champ: str = None
-
+        champ: str = None,
+        tags: str = None,
+        quote: str = None,
+        skin: str = None,
+        show: bool = False
     ):      
-        await interaction.response.defer()
+        await interaction.response.defer(ephemeral=not show)
+        asyncio.sleep(0.1)
         #champ = "Kalista"
-        
-        if(champ):
-            name = self.aliases[champ.lower()]
-            line = random.choice(list(self.audios[name].items()))
-            # quote = line[0]
+        if(tags):
+            tags = tags.split(",")
+            print(tags)
+        res = self.search(champ=champ,skin=skin,tags=tags,quote=quote)
+        if len(list(res)) == 0:
+            await interaction.followup.send("Coudln't find your search lol ;3")
+            return
+        print("Results: ", len(list(res)))
 
+        name = random.choice(list(res.keys()))
+        champdata = res[name]
+
+        quote = random.choice(list(champdata.keys()))
+        quotedata = champdata[quote]
+
+
+        #print(quote,quotedata)
+        if skin:
+            link = quotedata["Files"][skin]
+            skinname = skin
         else:
-            c = random.choice(list(self.audios.items()))
-
-            line = random.choice(list(c[1].items()))
-
-            name = c[0]
-        with open("leaguecontents/" + f"{name}"+".mp4", "w") as r:
-            r.write(" ")
-        quote = line[0]
-        skinlink = random.choice(list(line[1]["Files"].items()))
-        skin,link = skinlink
-
-        print("Skin: ", skin)
+            skinname = random.choice(list(quotedata["Files"].keys()))
+            link = quotedata["Files"][skinname]
+        if(not skinname.isalpha()):
+            s = skinname.split()
+            skinname = " ".join([m for m in s if m.isalpha() or not(m.isnumeric() and int(m) < 2000)])
+            print(skinname)
+        #print(skinname)
+        #print(quote,skinname)
         file_name = f"{quote}" +".ogg"
         # link = audios[champ][quote]["Files"]["Original"]
-        pic = self.champs[name]["Skins"][skin]["Splash"]
+        print("Skin: ", skinname)
+        pic = self.champs[name]["Skins"][skinname]["Splash"]
+
+        #print("Skin: ", skin)
+        #file_name = f"{quote}" +".ogg"
+        # link = audios[champ][quote]["Files"]["Original"]
+        #pic = self.champs[name]["Skins"][skin]["Splash"]
         pic_file = f"{name}" + ".jpg"
         with requests.get(link, allow_redirects=True) as response, open("leaguecontents/" + file_name, 'wb') as f:
             #print(response.text)
@@ -93,15 +151,18 @@ class Kittyleague(commands.Cog):
         video_clip = image_clip.set_audio(audio_clip)
         video_clip.duration = audio_clip.duration
         video_clip.fps = 1
-        txt_clip = TextClip(quote+"\n-"+name,method="caption",color="white",size=(1215,150))
+        # txt_clip = TextClip(quote+"\n-"+name,method="caption",color="white",size=(1215,150))
+        txt_clip = TextClip(quote+"\n-"+name,stroke_width=2,stroke_color="black",method="caption",color="white",size=(1215,200),font="Roboto")
 
 
-        txt_clip = txt_clip.set_pos("center").set_duration(audio_clip.duration)
+        # txt_clip = txt_clip.set_pos("center").set_duration(audio_clip.duration)
+        txt_clip = txt_clip.set_pos(("center","bottom")).set_duration(audio_clip.duration)
+
         video_clip = CompositeVideoClip([video_clip, txt_clip])
         video_clip.duration = audio_clip.duration
-        video_clip.write_videofile("leaguecontents/" + f"{name}"+".mp4")
+        video_clip.write_videofile("leaguecontents/" + f"{name}"+".webm")
 
-        await interaction.followup.send(file=discord.File("leaguecontents/" + f"{name}"+".mp4"))
+        await interaction.followup.send(file=discord.File("leaguecontents/" + f"{name}"+".webm"))
 
         pathlib.Path("leaguecontents/" + file_name).unlink(missing_ok=True)
         pathlib.Path("leaguecontents/" + pic_file).unlink(missing_ok=True)
