@@ -9,13 +9,20 @@ from moviepy.editor import AudioFileClip, ImageClip, CompositeVideoClip, TextCli
 import requests
 import pathlib
 
+import sys
+    # caution: path[0] is reserved for script path (or '' in REPL)
+sys.path.insert(1, '/home/asher/clippy')
+
+from clip import Clippy
+
+
 import os
 name = os.path.splitext(os.path.basename(__file__))[0]
 class Kittyleague(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
         self.myguild = bot.myguild
-        
+        self.clip = Clippy(folder="leaguecontents/")
         with open("/home/asher/leagueapi/champs/champs.json", "r") as r:
             self.champs = json.load(r)
         with open("/home/asher/leagueapi/champs/aliases.json", "r") as r:
@@ -146,27 +153,31 @@ class Kittyleague(commands.Cog):
         with requests.get(pic,allow_redirects=True) as response, open("leaguecontents/" + pic_file, "wb") as f:
             data = response.content
             f.write(data)
-        audio_clip = AudioFileClip("leaguecontents/" + file_name)
-        image_clip = ImageClip("leaguecontents/" + pic_file)
+    
+        self.clip.textonvideo(quote+"\n-"+name,self.clip.imageaudiotovid(pic_file,file_name))
 
-        video_clip = image_clip.set_audio(audio_clip)
-        video_clip.duration = audio_clip.duration
-        video_clip.fps = 1
-        # txt_clip = TextClip(quote+"\n-"+name,method="caption",color="white",size=(1215,150))
-        txt_clip = TextClip(quote+"\n-"+name,stroke_width=1.5,stroke_color="black",method="caption",color="white",size=(1215,250),font="Roboto")
+        # audio_clip = AudioFileClip("leaguecontents/" + file_name)
+        # image_clip = ImageClip("leaguecontents/" + pic_file)
+
+        # video_clip = image_clip.set_audio(audio_clip)
+        # video_clip.duration = audio_clip.duration
+        # video_clip.fps = 1
+        # # txt_clip = TextClip(quote+"\n-"+name,method="caption",color="white",size=(1215,150))
+        # txt_clip = TextClip(quote+"\n-"+name,stroke_width=1.5,stroke_color="black",method="caption",color="white",size=(1215,250),font="Roboto")
 
 
-        # txt_clip = txt_clip.set_pos("center").set_duration(audio_clip.duration)
-        txt_clip = txt_clip.set_pos(("center","bottom")).set_duration(audio_clip.duration)
+        # # txt_clip = txt_clip.set_pos("center").set_duration(audio_clip.duration)
+        # txt_clip = txt_clip.set_pos(("center","bottom")).set_duration(audio_clip.duration)
 
-        video_clip = CompositeVideoClip([video_clip, txt_clip])
-        video_clip.duration = audio_clip.duration
-        video_clip.write_videofile("leaguecontents/" + f"{name}"+".webm")
+        # video_clip = CompositeVideoClip([video_clip, txt_clip])
+        # video_clip.duration = audio_clip.duration
+        # video_clip.write_videofile("leaguecontents/" + f"{name}"+".webm")
 
-        await interaction.followup.send(file=discord.File("leaguecontents/" + f"{name}"+".webm"))
+        await interaction.followup.send(file=discord.File("leaguecontents/" + "output_text.mp4"))
 
         pathlib.Path("leaguecontents/" + file_name).unlink(missing_ok=True)
         pathlib.Path("leaguecontents/" + pic_file).unlink(missing_ok=True)
+        pathlib.Path("leaguecontents/" + "output.mp4").unlink(missing_ok=True)
         # pathlib.Path("leaguecontents/" + f"{name}"+".mp4").unlink(missing_ok=True)
     
 
