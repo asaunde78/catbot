@@ -4,14 +4,25 @@ from discord import app_commands
 import random
 import requests
 import json
-import os
+import os,shutil
 name = os.path.splitext(os.path.basename(__file__))[0]
+import sys
+from google_images_search import GoogleImagesSearch
+    # caution: path[0] is reserved for script path (or '' in REPL)
+sys.path.insert(1, '/home/asher/clippy')
+
+
+from clip import Clippy
+
 class Plaincat(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
-        
+        self.clip = Clippy(folder = "images/")
         self.guild = self.bot.myguild
         self.tenortoken = bot.tenortoken
+        self.cx = bot.cx
+        self.apikey = bot.apikey
+    
         self.letters = {'a': '🇦', 'b': '🇧', 'c': '🇨', 'd': '🇩', 'e': '🇪', 'f': '🇫', 'g': '🇬', 'h': '🇭', 'i': '🇮', 'j': '🇯', 'k': '🇰', 'l': '🇱', 'm': '🇲', 'n': '🇳', 'o': '🇴', 'p': '🇵', 'q': '🇶', 'r': '🇷', 's': '🇸', 't': '🇹', 'u': '🇺', 'v': '🇻', 'w': '🇼', 'x': '🇽', 'y': '🇾', 'z': '🇿'}
         self.word = 'nice'
         self.responses = ["! I'm CatBot!", "! You rang?", "! That's my name. Don't wear it out!", "! Did you just say my name?", ""]
@@ -44,8 +55,41 @@ class Plaincat(commands.Cog):
     ) -> None:
         await interaction.response.send_message("Okay I'll say that :3",ephemeral=True)
         await interaction.channel.send(message)
+    
+    @app_commands.command(name="gifgen", description="Turns the gif magic, ON! ;3 ")
+    async def gengifs(
+        self,
+        interaction: discord.Interaction,
+        search: str,
+        count: int = 10,
+        fps: int = 12,
+        show: bool = False
+    ):
+        folder = 'images/'
+        await interaction.response.defer(ephemeral=not show)
+        for filename in os.listdir(folder):
+            file_path = os.path.join(folder, filename)
+            try:
+                if os.path.isfile(file_path) or os.path.islink(file_path):
+                    os.unlink(file_path)
+                elif os.path.isdir(file_path):
+                    shutil.rmtree(file_path)
+            except Exception as e:
+                print('Failed to delete %s. Reason: %s' % (file_path, e))
+        imagesearch = GoogleImagesSearch(self.apikey,self.cx)
+        _search_params = {
+            'q':search,
+            "num":count,
+            "fileType":"png"
+        }
+        imagesearch.search(search_params=_search_params,path_to_dir=folder,width=800,height=600,custom_image_name="image")
+        
+        
+        await interaction.followup.send(file=discord.File( folder + self.clip.imagestogif("image(%d).png",framerate=fps)))
+        
 
-
+        
+        
     @app_commands.command(name="question",description="Magic 8-Ball style answers the given question")
     async def question(
         self,

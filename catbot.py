@@ -16,6 +16,8 @@ class catbot(commands.Bot):
         
         self.myguild = token.guild
         self.tenortoken = token.tenortoken
+        self.apikey = token.apikey
+        self.cx = token.cx
         self.message = 0
         self.bots = []
 
