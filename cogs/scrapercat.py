@@ -1,6 +1,7 @@
 import discord
 from discord.ext import commands
 from discord import app_commands
+from typing import Literal, Optional
 import os
 name = os.path.splitext(os.path.basename(__file__))[0]
 import sys
@@ -25,9 +26,11 @@ class Scrapercat(commands.Cog):
         search: str,
         show: bool,
         frametiming: float = 1.0,
+        ftype: Optional[Literal["png","jpg","webp"]] = "jpg"
     ):
         await interaction.response.defer(ephemeral=not show)
-        search  += "filetype:jpg"
+        
+        search  += f" filetype:{ftype}"
     
         images = self.scraper.genimages(search,3)
         
@@ -42,12 +45,12 @@ class Scrapercat(commands.Cog):
                         print('Failed to delete %s. Reason: %s' % (file_path, e))
         for index,link in enumerate(images):
             print(link)
-            with requests.get(link, allow_redirects=True) as response, open(self.folder + f"/image({index}).jpg", 'wb') as f:
+            with requests.get(link, allow_redirects=True) as response, open(self.folder + f"/image({index}).{ftype}", 'wb') as f:
                 #print(response.text)
                 data = response.content
                 f.write(data)
         print("done writing")
-        gif = self.c.imagestogif("image(%d).jpg",frametiming=frametiming)
+        gif = self.c.imagestogif(f"image(%d).{ftype}",frametiming=frametiming)
         await interaction.followup.send(file=discord.File(self.folder + "/" + gif))
     @app_commands.command(name="getlinks", description="Experimental :3")
     async def getlinks(

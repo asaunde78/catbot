@@ -6,3 +6,4 @@ leaguecontents/
 subtitles.srt
 driver/*
 scrapedpics/*
+cogs/__pycache__/*
