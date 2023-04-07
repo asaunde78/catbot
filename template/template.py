@@ -11,7 +11,7 @@ if args.source:
 else:
     source = -1
 
-
+name = os.path.splitext(os.path.basename(__file__))[0]
 
 class TemplateClient(discord.Client):
     def __init__(self,source,*args,**kwargs):

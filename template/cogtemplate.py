@@ -19,5 +19,5 @@ async def setup(bot: commands.Bot):
     await message.add_reaction("🐱")
     e = discord.Embed(title=message.embeds[0].title)
     
-    e.set_footer(text=message.embeds[0].footer.text.replace(f"Waiting for: {name}","{name} on!"))
+    e.set_footer(text=message.embeds[0].footer.text.replace(f"Waiting for: {name}",f"{name} on!"))
     await message.edit(embed=e)

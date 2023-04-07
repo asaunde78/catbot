@@ -23,7 +23,8 @@ class Scrapercat(commands.Cog):
         self,
         interaction: discord.Interaction,
         search: str,
-        show: bool
+        show: bool,
+        frametiming: int = 1,
     ):
         await interaction.response.defer(ephemeral=not show)
         search  += "filetype:jpg"
@@ -46,7 +47,7 @@ class Scrapercat(commands.Cog):
                 data = response.content
                 f.write(data)
         print("done writing")
-        gif = self.c.imagestogif("image(%d).jpg",framerate=24)
+        gif = self.c.imagestogif("image(%d).jpg",framerate=len(images),delay=0,frametiming=float(input("frametiming")))
         await interaction.followup.send(file=discord.File(self.folder + "/" + gif))
     @app_commands.command(name="getlinks", description="Experimental :3")
     async def getlinks(
@@ -69,5 +70,5 @@ async def setup(bot: commands.Bot):
     await message.add_reaction("⛏️")
     e = discord.Embed(title=message.embeds[0].title)
     
-    e.set_footer(text=message.embeds[0].footer.text.replace(f"Waiting for: {name}","{name} on!"))
+    e.set_footer(text=message.embeds[0].footer.text.replace(f"Waiting for: {name}",f"{name} on!"))
     await message.edit(embed=e)
