@@ -8,7 +8,7 @@ import sys
 sys.path.insert(1, '/home/asher/catscraper')
 sys.path.insert(1, '/home/asher/clippy')
 import requests
-
+import time
 from clip import Clippy
 
 import shutil
@@ -28,6 +28,7 @@ class Scrapercat(commands.Cog):
         frametiming: float = 1.0,
         ftype: Optional[Literal["png","jpg","webp"]] = "jpg"
     ):
+        begin = time.time()
         await interaction.response.defer(ephemeral=not show)
         
         search  += f" filetype:{ftype}"
@@ -35,14 +36,14 @@ class Scrapercat(commands.Cog):
         images = self.scraper.genimages(search,3)
         
         for filename in os.listdir(self.folder):
-                    file_path = os.path.join(self.folder, filename)
-                    try:
-                        if os.path.isfile(file_path) or os.path.islink(file_path):
-                            os.unlink(file_path)
-                        elif os.path.isdir(file_path):
-                            shutil.rmtree(file_path)
-                    except Exception as e:
-                        print('Failed to delete %s. Reason: %s' % (file_path, e))
+            file_path = os.path.join(self.folder, filename)
+            try:
+                if os.path.isfile(file_path) or os.path.islink(file_path):
+                    os.unlink(file_path)
+                elif os.path.isdir(file_path):
+                    shutil.rmtree(file_path)
+            except Exception as e:
+                print('Failed to delete %s. Reason: %s' % (file_path, e))
         for index,link in enumerate(images):
             print(link)
             with requests.get(link, allow_redirects=True) as response, open(self.folder + f"/image({index}).{ftype}", 'wb') as f:
@@ -51,6 +52,8 @@ class Scrapercat(commands.Cog):
                 f.write(data)
         print("done writing")
         gif = self.c.imagestogif(f"image(%d).{ftype}",frametiming=frametiming)
+        end = time.time()
+        print(f"[INFO] Generating the pictures took {end-begin} seconds")
         await interaction.followup.send(file=discord.File(self.folder + "/" + gif))
     @app_commands.command(name="getlinks", description="Experimental :3")
     async def getlinks(
