@@ -19,35 +19,28 @@ class Scrapercat(commands.Cog):
         self.bot = bot
         self.folder = "scrapedpics"
         self.c = Clippy(folder=self.folder)
-        self.scraper = scraper(workers=2,server=True,folder=self.folder)
+        self.scraper = scraper(workers=1,server=True,folder=self.folder,fixname=True)
     @app_commands.command(name="getimages",description="Generates a gif of a google images search using my own google search scraper")
     async def getimages(
         self,
         interaction: discord.Interaction,
         search: str,
-        show: bool,
-        frametiming: float = 1.0,
-        ftype: Optional[Literal["png","jpg","webp"]] = "jpg"
+        show: bool = True,
+        delay: float = 10.0,
+        count: int = 12
+        # ftype: Optional[Literal["png","jpg","webp"]] = "jpg"
     ):
         begin = time.time()
         await interaction.response.defer(ephemeral=not show)
-        
+        filesize = 7.5
+        if count > 40:
+            count = 40
+        self.scraper.genimages(search,count)
     
-        self.scraper.genimages(search,6)
-    
-        gif = self.c.imagestogif(f"image(%d).{ftype}",filetype=ftype,glob=True,frametiming=frametiming)
+        gif = self.c.imagestogif(delay=delay,filesize=filesize)
         end = time.time()
         print(f"[INFO] Generating the pictures took {end-begin} seconds")
         await interaction.followup.send(file=discord.File(self.folder + "/" + gif))
-    @app_commands.command(name="getlinks", description="Experimental :3")
-    async def getlinks(
-        self,
-        interaction: discord.Interaction,
-        search: str
-    ):
-        await interaction.response.defer(ephemeral=True)
-        images = self.scraper.genimages(search,3)
-        await interaction.followup.send(images)
     
 async def setup(bot: commands.Bot):
     global name
