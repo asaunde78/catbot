@@ -13,7 +13,7 @@ class catbot(commands.Bot):
     def __init__(self,*args,**kwargs):
         super().__init__(*args,**kwargs)
         self.greetings = ["MIAOU!", "CatBot reporting for duty!", "CatBot back online!","CatSystems turning on...", "I am a CatBot", "Miaou!", "CatOS loading..."]
-        
+        self.loaded = False
         self.myguild = token.guild
         self.tenortoken = token.tenortoken
         self.apikey = token.apikey
@@ -93,15 +93,18 @@ async def on_ready():
     await client.change_presence(status=discord.Status.online, activity=game)
     channel = client.get_channel(796072509039837207)
     ip = subprocess.check_output("hostname -I".split()).decode().strip("\n")
+    if(not client.loaded):
+        e=discord.Embed(title=random.choice(client.greetings))
+        await find_cogs()
+        print(client.bots)
+        e.set_footer(text="IP: asher@" +ip +"\n" + '\n'.join(["Waiting for: " + bot for bot in client.bots]))
+        announce = await channel.send(embed=e)
+        client.message = announce.id
 
-    e=discord.Embed(title=random.choice(client.greetings))
-    await find_cogs()
-    print(client.bots)
-    e.set_footer(text="IP: asher@" +ip +"\n" + '\n'.join(["Waiting for: " + bot for bot in client.bots]))
-    announce = await channel.send(embed=e)
-    client.message = announce.id
-
-    await load_cogs()
+        await load_cogs()
+        client.loaded = True
+    else:
+        await channel.send("Reloaded! ;3")
 
     
 

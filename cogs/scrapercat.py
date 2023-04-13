@@ -19,7 +19,7 @@ class Scrapercat(commands.Cog):
         self.bot = bot
         self.folder = "scrapedpics"
         self.c = Clippy(folder=self.folder)
-        self.scraper = scraper(workers=1,server=True,folder=self.folder,fixname=True)
+        self.scraper = scraper(workers=1,server=True,folder=self.folder,fixname=False)
     @app_commands.command(name="getimages",description="Generates a gif of a google images search using my own google search scraper")
     async def getimages(
         self,
@@ -35,7 +35,7 @@ class Scrapercat(commands.Cog):
         filesize = 7.5
         if count > 40:
             count = 40
-        self.scraper.genimages(search,count)
+        self.scraper.genimages(search,count,divide=True)
     
         gif = self.c.imagestogif(delay=delay,filesize=filesize)
         end = time.time()
