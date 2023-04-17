@@ -20,26 +20,52 @@ class Scrapercat(commands.Cog):
         self.folder = "scrapedpics"
         self.c = Clippy(folder=self.folder)
         self.scraper = scraper(workers=1,server=True,folder=self.folder,fixname=False)
+    @app_commands.command(name="collage",description="Genereates a collage of all the images from the google search")
+    async def collage(
+        self,
+        interaction: discord.Interaction,
+        search: str,
+        show: bool = True,
+        count: int = 12,
+        squares: bool = True
+        
+    ):
+        begin = time.time()
+        await interaction.response.defer(ephemeral=not show)
+        filesize = 15.0
+        if count > 40:
+            count = 40
+        self.scraper.genimages(search,count,divide=True)
+    
+        collage = self.c.imagestocollage(filesize=filesize,count=count,squares=squares)
+        end = time.time()
+        print(f"[INFO] Generating the pictures and generating the collage took {end-begin} seconds")
+        await interaction.followup.send(file=discord.File(self.folder + "/" + collage))
     @app_commands.command(name="getimages",description="Generates a gif of a google images search using my own google search scraper")
     async def getimages(
         self,
         interaction: discord.Interaction,
         search: str,
         show: bool = True,
-        delay: float = 10.0,
+        delay: float = 30.0,
         count: int = 12
+        # quick: bool = False
         # ftype: Optional[Literal["png","jpg","webp"]] = "jpg"
     ):
+        quick = False
         begin = time.time()
         await interaction.response.defer(ephemeral=not show)
-        filesize = 7.5
+        filesize = 15.0
         if count > 40:
             count = 40
         self.scraper.genimages(search,count,divide=True)
-    
-        gif = self.c.imagestogif(delay=delay,filesize=filesize)
+        if(not quick):
+            gif = self.c.imagestogif(delay=delay,filesize=filesize)
+        else:
+            self.c.changeimagetype()
+            gif = self.c.ffimagestogif(frametiming=delay)
         end = time.time()
-        print(f"[INFO] Generating the pictures took {end-begin} seconds")
+        print(f"[INFO] Generating the pictures and generating the gif took {end-begin} seconds")
         await interaction.followup.send(file=discord.File(self.folder + "/" + gif))
     
 async def setup(bot: commands.Bot):
