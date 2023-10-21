@@ -1,0 +1,22 @@
+[tool.poetry]
+name = "catbot"
+version = "0.1.0"
+description = ""
+authors = ["asher saunders"]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+discord = "^2.3.2"
+requests = "^2.31.0"
+selenium = "^4.11.2"
+webdriver-manager = "^4.0.0"
+Flask = "^2.3.3"
+Google-Images-Search = "^1.4.6"
+moviepy = "^1.0.3"
+ffmpeg = "^1.4"
+
+[tool.poetry.dev-dependencies]
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

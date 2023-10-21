@@ -5,21 +5,23 @@ from typing import Literal, Optional
 import os
 name = os.path.splitext(os.path.basename(__file__))[0]
 import sys
-sys.path.insert(1, '/home/asher/catscraper/blockerextension.crx')
-sys.path.insert(1, '/home/asher/catscraper')
+
+sys.path.insert(1, '/home/asher/scraperrework/scraper')
 sys.path.insert(1, '/home/asher/clippy')
+
 import requests
 import time
 from clip import Clippy
 
 import shutil
-from runner import scraper
+from scraper.scraper import manager
 class Scrapercat(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
-        self.folder = "scrapedpics"
+        self.folder = "images"
         self.c = Clippy(folder=self.folder)
-        self.scraper = scraper(workers=1,server=True,folder=self.folder,fixname=False)
+        self.scraper = manager()
+        self.scraper.start()
     @app_commands.command(name="collage",description="Genereates a collage of all the images from the google search")
     async def collage(
         self,
@@ -35,7 +37,7 @@ class Scrapercat(commands.Cog):
         filesize = 15.0
         if count > 40:
             count = 40
-        self.scraper.genimages(search,count,divide=True)
+        self.scraper.getimages(search,count)
     
         collage = self.c.imagestocollage(filesize=filesize,count=count,squares=squares)
         end = time.time()
@@ -58,7 +60,7 @@ class Scrapercat(commands.Cog):
         filesize = 15.0
         if count > 40:
             count = 40
-        self.scraper.genimages(search,count,divide=True)
+        self.scraper.getimages(search,count)
         if(not quick):
             gif = self.c.imagestogif(delay=delay,filesize=filesize)
         else:
