@@ -2,7 +2,8 @@ import discord
 from discord.ext import commands
 from discord import app_commands
 import random
-
+import requests
+from cogs.tools.videotogif import converter
 import os,shutil
 name = os.path.splitext(os.path.basename(__file__))[0]
 import sys
@@ -17,6 +18,35 @@ class Videokat(commands.Cog):
         self.bot = bot
         self.guild = self.bot.myguild
         self.glimpser = glimpser()
+        self.converter = converter()
+
+
+
+    @commands.Cog.listener()
+    async def on_message(self,message):
+        if message.author.id == self.bot.user.id or message.author.id == 493938037189902358:
+            return
+        # print(message.embeds)
+        for v in (v.video for v in message.embeds if v.video is not None):
+            print(v.url)
+
+            video_data = requests.get(v.url).content
+            
+            with open("gifgen/input.mp4", "wb") as handler:
+                handler.write(video_data)
+            self.converter.convert()
+            
+            await message.channel.send(file=discord.File("gifgen/gifgen.gif"))
+
+            # if f is None:
+            #     return
+            # if not f.endswith((".mp4")):
+            #     file_helper.remove(f)
+            #     return
+            
+            
+            # file_helper.remove(out)
+        
 
     @app_commands.command(name="glimpse",description="Take a glimpse of a youtube video")
     async def glimpse(

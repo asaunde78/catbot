@@ -6,4 +6,8 @@ leaguecontents/
 subtitles.srt
 driver/*
 scrapedpics/*
-cogs/__pycache__/*
+cogs/__pycache__/
+cogs/tools/__pycache__/
+videos/
+join_video.txt
+output_demuxer.mp4
