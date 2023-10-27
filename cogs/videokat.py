@@ -22,21 +22,21 @@ class Videokat(commands.Cog):
 
 
 
-    @commands.Cog.listener()
-    async def on_message(self,message):
-        if message.author.id == self.bot.user.id or message.author.id == 493938037189902358:
-            return
-        # print(message.embeds)
-        for v in (v.video for v in message.embeds if v.video is not None):
-            print(v.url)
+    # @commands.Cog.listener()
+    # async def on_message(self,message):
+    #     if message.author.id == self.bot.user.id or message.author.id == 493938037189902358:
+    #         return
+    #     # print(message.embeds)
+    #     for v in (v.video for v in message.embeds if v.video is not None):
+    #         print(v.url)
 
-            video_data = requests.get(v.url).content
+    #         video_data = requests.get(v.url).content
             
-            with open("gifgen/input.mp4", "wb") as handler:
-                handler.write(video_data)
-            self.converter.convert()
+    #         with open("gifgen/input.mp4", "wb") as handler:
+    #             handler.write(video_data)
+    #         self.converter.convert()
             
-            await message.channel.send(file=discord.File("gifgen/gifgen.gif"))
+    #         await message.channel.send(file=discord.File("gifgen/gifgen.gif"))
 
             # if f is None:
             #     return
